@@ -5,6 +5,7 @@
 
 var express = require('express');
 var routes = require('./routes');
+var db = require('./model/db');
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
