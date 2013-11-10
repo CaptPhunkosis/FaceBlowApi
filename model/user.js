@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var createUpdateInfo = require('./plugins/create_update_info');
+var PlantedMine = require('./planted_mine').PlantedMine;
 
 var UserSchema = new mongoose.Schema({
     name: String,
@@ -10,6 +11,30 @@ var UserSchema = new mongoose.Schema({
 });
 
 UserSchema.plugin(createUpdateInfo);
+
+UserSchema.statics.findUserAndMines = function(user_uuid, callback){
+    query = {uuid: user_uuid};
+    options = {upsert: true};
+    this.findOneAndUpdate(query, query, options, function(err, user){
+        if(err){
+            return callback(err, null);
+        }
+
+        PlantedMine.findUserMines(user, function(err, mines){
+            if(err){
+                return callback(err, null);
+            }
+            return callback(null, {user:user, plantedMines: mines});
+        });
+
+    });
+};
+
+UserSchema.methods.forPublic = function(){
+    var result = this.toObject();
+    delete result._id;
+    return result;
+}
 
 var User = mongoose.model('User', UserSchema);
 
