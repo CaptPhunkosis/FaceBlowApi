@@ -32,11 +32,41 @@ exports.fetch = function(req, res){
     });
 };
 
+
+//curl -d "id=asdfjkl;&longitude=-73.991997&latitude=40.679526" http://localhost:3000/user/plantmine
+exports.plantMine = function(req, res){
+    var uuid = req.body.id;
+    var longitude = Number(req.body.longitude);
+    var latitude = Number(req.body.latitude);
+
+    if(!uuid || !longitude || !latitude){
+        sendFailure(res, 500, 'Missing required param');
+    }
+
+    User.findOne({uuid:uuid}, function(err, user){
+        if(err || !user){
+            console.log(err);
+            return sendFailure(res, 500, "Failed To Retrieve User");
+        }
+
+        var geoPoint = geoHelpers.latlongToGeoPoint(latitude, longitude);
+        var query = {bomber:user, loc:geoPoint};
+        PlantedMine.create(query, function(err, plantedMine) {
+            if(err){
+                console.log(err);
+                return sendFailure(res, 500, "Failed To Plant Mine");
+            }
+
+            return sendSuccess(res, plantedMine.forPublic());
+        });
+    });
+
+}
+
 exports.test = function(req, res){
     User.findOne({uuid:'asdfjkl;'}, function(err, user){
         var geoPoint = geoHelpers.latlongToGeoPoint(40.711093, -73.948975);
         query = {bomber:user, loc:geoPoint};
-        console.log(query);
         PlantedMine.create(query, function(err, PM){
             console.log(err);
             res.json(PM);

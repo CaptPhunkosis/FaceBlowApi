@@ -26,7 +26,6 @@ PlantedMineSchema.methods.forPublic = function(){
         lat: this.loc.coordinates[0],
         long: this.loc.coordinates[1],
         bomber: this.bomber.uuid,
-        updatedOn: this.updatedOn,
         createdOn: this.createdOn
     };
     return result;
