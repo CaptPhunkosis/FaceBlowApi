@@ -3,6 +3,7 @@
  * Module dependencies.
  */
 
+var config = require('./config');
 var express = require('express');
 var db = require('./model/db');
 var user = require('./routes/user');
@@ -12,7 +13,7 @@ var path = require('path');
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || config.app.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon());
@@ -21,8 +22,9 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, config.static_assets.dir)));
 
+console.log(config.mines.maxDistance);
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
