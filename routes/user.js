@@ -8,7 +8,7 @@ var config = require('../config');
 
 exports.fetch = function(req, res){
     if(!req.params.id){
-
+        sendFailure(res, 500, 'Missing required param');
     }
 
     query = {uuid: req.params.id};
@@ -24,7 +24,6 @@ exports.fetch = function(req, res){
 
         for(var i=0; i < results.plantedMines.length; i++){
             var pm = results.plantedMines[i];
-            console.log( pm);
             plantedMines.push(pm.forPublic());
         }
 
@@ -50,7 +49,6 @@ exports.plantMine = function(req, res){
 
     PlantedMine.findNearest(latitude, longitude, config.mines.maxDistance, function(err, mines){
         if(err || mines.length > 0) {
-            console.log(mines.length);
             return sendFailedToPlantMine(res);
         }
 
@@ -74,6 +72,40 @@ exports.plantMine = function(req, res){
     });
 }
 
+function sendFailedToPlantMine(res){
+    sendFailure(res, 500, "Failed To Plant Mine");
+}
+
+
+exports.checkForMines = function(req, res){
+    var latitude = req.query.latitude;
+    var longitude = req.query.longitude;
+    var uuid = req.params.id;
+
+    if(!latitude || !longitude || !uuid){
+        return sendFailure(res, 500, "Invalid Params");
+    }
+
+    PlantedMine.findNearest(latitude, longitude, config.mines.maxDistance, function(err, mines){
+        if(err){
+            console.log(err);
+            return sendFailure(res, 500, "Failed To Retrieve Data");
+        }
+
+        var userMines = Array();
+        var otherMines = Array();
+        for(i in mines){
+            if(uuid == mines[i].bomber.uuid){
+                userMines.push(mines[i].forPublic());
+            }else{
+                otherMines.push(mines[i].forPublic());
+            }
+        }
+        result = {users:userMines, others:otherMines}
+        return sendSuccess(res, result);
+    });
+}
+
 
 exports.test = function(req, res){
     PlantedMine.findNearest(40.679416, -73.992614, config.mines.maxDistance, function(err, mines){
@@ -92,6 +124,3 @@ function sendFailure(res, code, error){
     res.json(code, result);
 }
 
-function sendFailedToPlantMine(res){
-    sendFailure(res, 500, "Failed To Plant Mine");
-}

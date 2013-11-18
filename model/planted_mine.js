@@ -40,7 +40,7 @@ PlantedMineSchema.statics.findNearest = function(latitude, longitude, maxDistanc
 
     var geoPoint = geoHelpers.latlongToGeoPoint(latitude, longitude);
     var query = {'loc': {'$near': {'$geometry': geoPoint, '$maxDistance':maxDistance}}};
-    this.find(query, function(err, mines){
+    this.find(query).populate('bomber').exec(function(err, mines){
         if(err){
             return callback(err, null)
         }

@@ -31,6 +31,7 @@ if ('development' == app.get('env')) {
 
 app.get('/user/test', user.test);
 app.get('/user/:id', user.fetch);
+app.get('/user/:id/checkformines', user.checkForMines);
 app.post('/user/plantmine', user.plantMine);
 
 http.createServer(app).listen(app.get('port'), function(){
