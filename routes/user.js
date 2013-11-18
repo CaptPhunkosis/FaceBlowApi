@@ -2,6 +2,7 @@ var User = require('../model/user').User;
 var PlantedMine = require('../model/planted_mine.js').PlantedMine;
 var SpentMine = require("../model/spent_mine.js").SpentMine;
 var geoHelpers = require("../lib/geo_helpers");
+var config = require('../config');
 
 
 
@@ -33,7 +34,11 @@ exports.fetch = function(req, res){
 };
 
 
-//curl -d "id=asdfjkl;&longitude=-73.991997&latitude=40.679526" http://localhost:3000/user/plantmine
+
+//curl -d "id=asdfjkl;&latitude=40.679514&longitude=-73.992561" http://localhost:3000/user/plantmine
+//curl -d "id=asdfjkl;&latitude=40.678126&longitude=-73.990753" http://localhost:3000/user/plantmine
+//curl -d "id=asdfjkl;&latitude=40.680047&longitude=-73.990066" http://localhost:3000/user/plantmine
+//curl -d "id=asdfjkl;&latitude=40.679526&longitude=-73.991997" http://localhost:3000/user/plantmine
 exports.plantMine = function(req, res){
     var uuid = req.body.id;
     var longitude = Number(req.body.longitude);
@@ -43,34 +48,36 @@ exports.plantMine = function(req, res){
         sendFailure(res, 500, 'Missing required param');
     }
 
-    User.findOne({uuid:uuid}, function(err, user){
-        if(err || !user){
-            console.log(err);
-            return sendFailure(res, 500, "Failed To Retrieve User");
+    PlantedMine.findNearest(latitude, longitude, config.mines.maxDistance, function(err, mines){
+        if(err || mines.length > 0) {
+            console.log(mines.length);
+            return sendFailedToPlantMine(res);
         }
 
-        var geoPoint = geoHelpers.latlongToGeoPoint(latitude, longitude);
-        var query = {bomber:user, loc:geoPoint};
-        PlantedMine.create(query, function(err, plantedMine) {
-            if(err){
+        User.findOne({uuid:uuid}, function(err, user){
+            if(err || !user){
                 console.log(err);
-                return sendFailure(res, 500, "Failed To Plant Mine");
+                return sendFailedToPlantMine(res);
             }
 
-            return sendSuccess(res, plantedMine.forPublic());
+            var geoPoint = geoHelpers.latlongToGeoPoint(latitude, longitude);
+            var query = {bomber:user, loc:geoPoint};
+            PlantedMine.create(query, function(err, plantedMine) {
+                if(err){
+                    console.log(err);
+                    return sendFailedToPlantMine(res);
+                }
+
+                return sendSuccess(res, plantedMine.forPublic());
+            });
         });
     });
-
 }
 
+
 exports.test = function(req, res){
-    User.findOne({uuid:'asdfjkl;'}, function(err, user){
-        var geoPoint = geoHelpers.latlongToGeoPoint(40.711093, -73.948975);
-        query = {bomber:user, loc:geoPoint};
-        PlantedMine.create(query, function(err, PM){
-            console.log(err);
-            res.json(PM);
-        });
+    PlantedMine.findNearest(40.679416, -73.992614, config.mines.maxDistance, function(err, mines){
+        return sendSuccess(res, mines);
     });
 };
 
@@ -83,4 +90,8 @@ function sendSuccess(res, data){
 function sendFailure(res, code, error){
     var result = {error:error, code:code};
     res.json(code, result);
+}
+
+function sendFailedToPlantMine(res){
+    sendFailure(res, 500, "Failed To Plant Mine");
 }

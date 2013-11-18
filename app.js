@@ -24,7 +24,6 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, config.static_assets.dir)));
 
-console.log(config.mines.maxDistance);
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
