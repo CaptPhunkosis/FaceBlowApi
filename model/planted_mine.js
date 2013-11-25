@@ -50,8 +50,8 @@ PlantedMineSchema.statics.findNearest = function(latitude, longitude, maxDistanc
 
 PlantedMineSchema.methods.forPublic = function(){
     var result = {
-        lat: this.loc.coordinates[0],
-        long: this.loc.coordinates[1],
+        long: this.loc.coordinates[0],
+        lat: this.loc.coordinates[1],
         bomber: this.bomber.uuid,
         createdOn: this.createdOn
     };

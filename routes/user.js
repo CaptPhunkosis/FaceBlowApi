@@ -11,8 +11,6 @@ exports.fetch = function(req, res){
         sendFailure(res, 500, 'Missing required param');
     }
 
-    query = {uuid: req.params.id};
-    options = {upsert: true};
     User.findUserAndMines(req.params.id, function(err, results){
         if(err){
             console.log(err);
