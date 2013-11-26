@@ -37,7 +37,7 @@ exports.fetch = function(req, res){
 //curl -d "id=asdfjkl;&latitude=40.680047&longitude=-73.990066" http://localhost:3000/user/plantmine
 //curl -d "id=asdfjkl;&latitude=40.679526&longitude=-73.991997" http://localhost:3000/user/plantmine
 exports.plantMine = function(req, res){
-    var uuid = req.body.id;
+    var uuid = req.params.id;
     var longitude = Number(req.body.longitude);
     var latitude = Number(req.body.latitude);
 
