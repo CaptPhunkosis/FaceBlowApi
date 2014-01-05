@@ -32,10 +32,6 @@ PlantedMineSchema.statics.findUserMines = function(user, callback) {
 };
 
 
-
-/*
- * Model Methods
- */
 PlantedMineSchema.statics.findNearest = function(latitude, longitude, maxDistance, callback) {
 
     var geoPoint = geoHelpers.latlongToGeoPoint(latitude, longitude);
@@ -48,12 +44,20 @@ PlantedMineSchema.statics.findNearest = function(latitude, longitude, maxDistanc
     });
 };
 
+
+
+
+/*
+ * Model Methods
+ */
+
 PlantedMineSchema.methods.forPublic = function(){
     var result = {
+        id: this._id,
         long: this.loc.coordinates[0],
         lat: this.loc.coordinates[1],
-        bomber: this.bomber.uuid,
-        createdOn: this.createdOn
+        createdOn: this.createdOn,
+        bomber: this.bomber.uuid
     };
     return result;
 }

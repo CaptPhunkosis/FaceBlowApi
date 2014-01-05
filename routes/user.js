@@ -32,10 +32,6 @@ exports.fetch = function(req, res){
 
 
 
-//curl -d "id=asdfjkl;&latitude=40.679514&longitude=-73.992561" http://localhost:3000/user/plantmine
-//curl -d "id=asdfjkl;&latitude=40.678126&longitude=-73.990753" http://localhost:3000/user/plantmine
-//curl -d "id=asdfjkl;&latitude=40.680047&longitude=-73.990066" http://localhost:3000/user/plantmine
-//curl -d "id=asdfjkl;&latitude=40.679526&longitude=-73.991997" http://localhost:3000/user/plantmine
 exports.plantMine = function(req, res){
     var uuid = req.params.id;
     var longitude = Number(req.body.longitude);
@@ -70,9 +66,6 @@ exports.plantMine = function(req, res){
     });
 }
 
-function sendFailedToPlantMine(res){
-    sendFailure(res, 500, "Failed To Plant Mine");
-}
 
 
 exports.checkForMines = function(req, res){
@@ -105,12 +98,55 @@ exports.checkForMines = function(req, res){
 }
 
 
+exports.tripMine = function(req, res) {
+    var mineID = req.query.mineID;
+    var uuid = req.params.id;
+
+    User.findOne({uuid:uuid}, function(err, user){
+        if(err){
+            return sendFailedToTripMine(res);
+        }
+
+        PlantedMine.findOne(mineID, function(err, plantedMine){
+            if(err){
+                return sendFailedToTripMine(res);
+            }
+
+            SpentMine.createFromPlanted(user, plantedMine, function(err, spentMine){
+                if(err){
+                    return sendFailedToTripMine(res);
+                }
+
+                plantedMine.remove(function(err, delPlantedMine){
+                    if(err){
+                        return sendFailedToTripMine(res);
+                    }
+                    return sendSuccess(res, spentMine.forPublic());
+                });
+            });
+        });
+    });
+}
+
+
 exports.test = function(req, res){
-    PlantedMine.findNearest(40.679416, -73.992614, config.mines.maxDistance, function(err, mines){
-        return sendSuccess(res, mines);
+    PlantedMine.findOne(function(err, mine){
+        SpentMine.createFromPlanted(mine.bomber, mine, function(err, spentmine){
+            if(err) return sendFailure(res, err)
+            return sendSuccess(res, spentmine.forPublic());
+        });
     });
 };
 
+
+
+function sendFailedToTripMine(res){
+    sendFailure(res, 500, "Failed To Trip Mine");
+}
+
+function sendFailedToPlantMine(res){
+    sendFailure(res, 500, "Failed To Plant Mine");
+}
 
 function sendSuccess(res, data){
     var result = {error: null, data: data}
