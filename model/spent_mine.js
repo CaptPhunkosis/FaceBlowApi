@@ -13,7 +13,7 @@ var SpentMineSchema = new mongoose.Schema({
     bomber: {type: mongoose.Schema.Types.ObjectId, ref: "User"},
     bombed: {type: mongoose.Schema.Types.ObjectId, ref: "User"},
     explodedAt: {type: Date, default: Date.now},
-    bomberAcknowledged: {type: Boolean, default: false}
+    bombedAcknowledged: {type: Boolean, default: false}
 });
 SpentMineSchema.index({loc: '2dsphere'});
 SpentMineSchema.path('loc.type').required(true);

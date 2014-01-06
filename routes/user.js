@@ -92,6 +92,7 @@ exports.checkForMines = function(req, res){
                 otherMines.push(mines[i].forPublic());
             }
         }
+        
         result = {users:userMines, others:otherMines}
         return sendSuccess(res, result);
     });
@@ -99,7 +100,7 @@ exports.checkForMines = function(req, res){
 
 
 exports.tripMine = function(req, res) {
-    var mineID = req.query.mineID;
+    var mineID = req.body.mineID;
     var uuid = req.params.id;
 
     User.findOne({uuid:uuid}, function(err, user){
@@ -129,7 +130,20 @@ exports.tripMine = function(req, res) {
 }
 
 
-exports.test = function(req, res){
+exports.acknowledgeTrip = function(req, res){
+    var mineID = req.body.mineID;
+    var uuid = req.params.id;
+
+    SpentMine.findOneAndUpdate(mineID, {bombedAcknowledged:true}).populate('bomber').populate('bombed').exec(function(err, mine){
+        if(err){
+            console.log(err);
+            return sendFailure(res, 500, "Failed to Acknowledge Tripped Mine");
+        }
+        return sendSuccess(res, mine.forPublic());
+    });
+}    
+    
+exports.test = function(req, res) {
     PlantedMine.findOne(function(err, mine){
         SpentMine.createFromPlanted(mine.bomber, mine, function(err, spentmine){
             if(err) return sendFailure(res, err)

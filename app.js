@@ -34,6 +34,7 @@ app.get('/user/:id', user.fetch);
 app.get('/user/:id/checkformines', user.checkForMines);
 app.post('/user/:id/plantmine', user.plantMine);
 app.post('/user/:id/tripmine', user.tripMine);
+app.post('/user/:id/acknowledgetrip', user.acknowledgeTrip);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
