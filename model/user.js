@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var createUpdateInfo = require('./plugins/create_update_info');
 var PlantedMine = require('./planted_mine').PlantedMine;
 var SpentMine = require('./spent_mine').SpentMine;
+var http = require('http');
 
 var UserSchema = new mongoose.Schema({
     name: String,
@@ -30,12 +31,36 @@ UserSchema.statics.findUserAndMines = function(user_uuid, callback){
                 if(err){
                     return callback(err, null);
                 }
-                return callback(null, {user:user, plantedMines: plantedMines, unackedMines:unackedMines});
+
+                if(!user.name){
+                    var options = {
+                        host:"randomword.setgetgo.com",
+                        path:"/get.php",
+                        port:80
+                    }
+                    http.get(options, function(res){
+                        var data = "";
+                        res.on("data", function(chunk){
+                            data += chunk;
+                        });
+
+                        res.on("end", function(){
+                            user.name = data.trim();
+                            user.save(function(err, user, numberAffected){
+                                return callback(null, {user:user, plantedMines: plantedMines, unackedMines:unackedMines});
+                            });
+                        });
+                    });
+                } else {
+                    return callback(null, {user:user, plantedMines: plantedMines, unackedMines:unackedMines});
+                }
+
             });
         });
 
     });
 };
+
 
 UserSchema.methods.forPublic = function(){
     var result = this.toObject();

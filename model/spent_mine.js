@@ -47,8 +47,8 @@ SpentMineSchema.methods.forPublic = function(){
         long: this.loc.coordinates[0],
         lat: this.loc.coordinates[1],
         createdOn: this.createdOn,
-        bomber: this.bomber.uuid,
-        bombed: this.bombed.uuid,
+        bomber: this.bomber.name,
+        bombed: this.bombed.name,
         explodedAt: this.explodedAt
     };
     return result;
