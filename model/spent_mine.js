@@ -33,8 +33,10 @@ SpentMineSchema.statics.createFromPlanted = function(bombedUser, plantedMine, ca
     });
 }
 
-
-
+SpentMineSchema.statics.findUserUnackedMines = function(bombedUser, callback) {
+    query = {bombed: bombedUser, bombedAcknowledged:false};
+    this.find(query).populate('bomber').populate('bombed').exec(callback);
+}
 
 /*
  * Model Methods

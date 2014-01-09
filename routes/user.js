@@ -25,7 +25,13 @@ exports.fetch = function(req, res){
             plantedMines.push(pm.forPublic());
         }
 
-        return sendSuccess(res, {user:user, plantedMines:plantedMines});
+        var unackedMines = new Array();
+        for(var i=0; i < results.unackedMines.length; i++){
+            var um = results.unackedMines[i];
+            unackedMines.push(um.forPublic());
+        }
+
+        return sendSuccess(res, {user:user, plantedMines:plantedMines, unackedMines:unackedMines});
 
     });
 };
@@ -92,7 +98,7 @@ exports.checkForMines = function(req, res){
                 otherMines.push(mines[i].forPublic());
             }
         }
-        
+
         result = {users:userMines, others:otherMines}
         return sendSuccess(res, result);
     });
@@ -134,7 +140,7 @@ exports.acknowledgeTrip = function(req, res){
     var mineID = req.body.mineID;
     var uuid = req.params.id;
 
-    SpentMine.findOneAndUpdate(mineID, {bombedAcknowledged:true}).populate('bomber').populate('bombed').exec(function(err, mine){
+    SpentMine.findOneAndUpdate({_id:mineID}, {bombedAcknowledged:true}).populate('bomber').populate('bombed').exec(function(err, mine){
         if(err){
             console.log(err);
             return sendFailure(res, 500, "Failed to Acknowledge Tripped Mine");

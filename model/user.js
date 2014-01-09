@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var createUpdateInfo = require('./plugins/create_update_info');
 var PlantedMine = require('./planted_mine').PlantedMine;
+var SpentMine = require('./spent_mine').SpentMine;
 
 var UserSchema = new mongoose.Schema({
     name: String,
@@ -20,11 +21,17 @@ UserSchema.statics.findUserAndMines = function(user_uuid, callback){
             return callback(err, null);
         }
 
-        PlantedMine.findUserMines(user, function(err, mines){
+        PlantedMine.findUserMines(user, function(err, plantedMines){
             if(err){
                 return callback(err, null);
             }
-            return callback(null, {user:user, plantedMines: mines});
+
+            SpentMine.findUserUnackedMines(user, function(err, unackedMines) {
+                if(err){
+                    return callback(err, null);
+                }
+                return callback(null, {user:user, plantedMines: plantedMines, unackedMines:unackedMines});
+            });
         });
 
     });
